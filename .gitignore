@@ -1,0 +1,49 @@
+# ── Python ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+dist/
+build/
+
+# ── Model artifacts ───────────────────────────────────────────────────────
+*.pkl
+
+# ── Data (raw + processed — regenerate from pipeline) ────────────────────
+data/raw/
+data/processed/
+
+# ── Downloaded reference data (not our work product) ─────────────────────
+data/reference/arm_strength_*.csv
+
+# ── Internal planning docs ────────────────────────────────────────────────
+CLAUDE.md
+nextsteps.md
+
+# ── Parquet / large binaries ──────────────────────────────────────────────
+*.parquet
+*.arrow
+
+# ── Environment / secrets ─────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.env
+
+# ── Next.js ───────────────────────────────────────────────────────────────
+web/.next/
+web/out/
+web/node_modules/
+web/.vercel/
+web/npm-debug.log*
+
+# ── OS ────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ───────────────────────────────────────────────────────────────────
+.idea/
