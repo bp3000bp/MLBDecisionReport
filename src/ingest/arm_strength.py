@@ -5,16 +5,17 @@ Arm strength data from Baseball Savant — manual download required.
 USER ACTION REQUIRED
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Baseball Savant's arm-strength leaderboard has no stable API endpoint.
-Download the CSV manually for each year 2020–2024:
+Download the CSV manually for each year 2020–2026:
 
   1. Go to Baseball Savant → Leaderboards → Arm Strength
      (search "baseball savant statcast arm strength leaderboard")
 
-  2. For EACH year (2020, 2021, 2022, 2023, 2024):
+  2. For EACH year (2020, 2021, 2022, 2023, 2024, 2025, 2026):
        - Set "Season" to the target year
        - Set "Position" to Outfielders (or download all positions and filter here)
        - Set min opportunities to 10+ to exclude tiny samples
        - Click the CSV download button (do NOT guess the URL — use the button)
+       Note: 2026 is an in-progress season — re-download periodically for fresh data.
 
   3. Save/rename each file to:
        data/reference/arm_strength_2020.csv
@@ -22,6 +23,8 @@ Download the CSV manually for each year 2020–2024:
        data/reference/arm_strength_2022.csv
        data/reference/arm_strength_2023.csv
        data/reference/arm_strength_2024.csv
+       data/reference/arm_strength_2025.csv
+       data/reference/arm_strength_2026.csv
 
   4. Run this script to validate:
        python src/ingest/arm_strength.py
@@ -39,7 +42,7 @@ from pathlib import Path
 import pandas as pd
 
 REF = Path(__file__).resolve().parents[2] / "data" / "reference"
-SEASONS = [2020, 2021, 2022, 2023, 2024]
+SEASONS = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
 
 # Actual Savant CSV column names (confirmed from downloaded files)
 REQUIRED_COLS = ["player_id", "arm_lf", "arm_cf", "arm_rf", "arm_overall"]

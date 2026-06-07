@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         <footer className="border-t border-slate-200 mt-16 py-8 text-center text-xs text-slate-400 space-y-1">
-          <p>Decision Report · Data: MLB Statcast, Baseball Reference, Baseball Savant · 2020–2024</p>
+          <p>Decision Report · Data: MLB Statcast, Baseball Reference, Baseball Savant · 2020–2026</p>
           <p>
             This tool grades decision-making, not player ability. All grades reflect expected value
             at the moment of the call, not the outcome of the individual play.

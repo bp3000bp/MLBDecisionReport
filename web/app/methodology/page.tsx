@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -10,14 +10,26 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Limitation({ children }: { children: React.ReactNode }) {
-  return (
-    <li className="flex items-start gap-2">
-      <span className="text-amber-500 mt-1">▲</span>
-      <span>{children}</span>
-    </li>
-  );
-}
+const modules = [
+  {
+    name: "Send/Hold Grader",
+    slug: "send-hold",
+    tagline: "Was the third-base coach's send or hold call correct by expected value?",
+    status: "Live · 2020–2026",
+  },
+  {
+    name: "Steal Attempt Grader",
+    slug: "steal-attempt",
+    tagline: "Was each stolen base attempt above the RE24 break-even success rate?",
+    status: "Live · 2020–2026",
+  },
+  {
+    name: "IBB Decision Grader",
+    slug: "ibb",
+    tagline: "Did the matchup gain from the intentional walk justify its run-expectancy cost?",
+    status: "Live · 2020–2026",
+  },
+];
 
 export default function MethodologyPage() {
   return (
@@ -28,196 +40,109 @@ export default function MethodologyPage() {
         </Link>
         <h1 className="text-3xl font-bold text-slate-900">Methodology</h1>
         <p className="text-slate-600">
-          A complete description of data sources, modeling choices, approximations, and known limitations.
-          Every shortcut is stated plainly. A clear limitation beats a suspiciously clean black box.
+          Every module is built on the same expected-value framework. Every shortcut is
+          stated plainly. A clear limitation beats a suspiciously clean black box.
         </p>
       </div>
 
-      <Section title="What we measure — and what we don't">
+      <Section title="The shared framework">
         <p>
-          Baseball Savant&apos;s baserunning leaderboard grades <em>player ability</em> — given a runner&apos;s
-          tools, did he take the base he should have? We grade the <em>decision layer</em>: given what
-          the third-base coach knew at the moment, was the send or hold call correct?
+          Baseball Savant grades <em>player ability</em> — given a runner&apos;s tools,
+          did he execute? We grade the <em>decision layer</em>: given what was knowable
+          at the moment of the call, was the decision correct in expected-value terms?
         </p>
         <p>
-          These are distinct questions. A talented runner sent on a 50/50 opportunity produces the same
-          coach grade regardless of whether he happens to be safe or out. This tool is not a player
-          evaluation tool.
+          These are distinct questions. A talented runner sent on a 50/50 opportunity produces
+          the same decision grade regardless of whether he happens to be safe or out. This is
+          not a player evaluation tool.
         </p>
+        <p>
+          Every module follows the same three steps:
+        </p>
+        <ol className="list-decimal pl-5 space-y-2">
+          <li>
+            <strong>Identify the decision.</strong> Isolate plays where a discrete, attributable
+            in-game call was made (send/hold, steal/no-steal, etc.) and the outcome is observable.
+          </li>
+          <li>
+            <strong>Compute the break-even.</strong> Using a 24-state RE24 run-expectancy table
+            built from 2020–2024 Statcast data, find the success probability at which the risky
+            action produces equal expected run value to the conservative alternative:
+            <pre className="bg-slate-100 rounded-lg p-3 text-sm font-mono overflow-x-auto mt-2">
+              P_be = (RE_hold − RE_out) / (RE_safe − RE_out)
+            </pre>
+          </li>
+          <li>
+            <strong>Estimate P(success) and grade.</strong> We use an <em>empirical bin approach</em>:
+            divide historical plays into bins defined by observable pre-play factors and compute the
+            observed success rate within each bin. This avoids the selection bias of training a model
+            only on cases where the risky action was attempted. Good decision = P(success) ≥ P_be.
+          </li>
+        </ol>
       </Section>
 
-      <Section title="Scope (v1)">
-        <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Situation:</strong> Runner on second base, ball hit to the outfield (single or double), opportunity to attempt to score.</li>
-          <li><strong>Years:</strong> 2020–2024 MLB regular season only.</li>
-          <li><strong>Data source:</strong> MLB Statcast event-level data via pybaseball.</li>
-          <li>Out of scope: stolen base attempts, IBBs, other in-game decisions — same methodology spine will extend to these.</li>
-        </ul>
-      </Section>
-
-      <Section title="Opportunity identification">
+      <Section title="Run value">
         <p>
-          We filter Statcast play-by-play data for events where a runner was on second base
-          (on_2b field) and the batter put the ball in play to the outfield (hit_location 7/8/9,
-          events = single or double). We then parse the play description text (des field) to
-          classify the runner&apos;s outcome: SCORED, OUT_AT_HOME, HELD_AT_BASE, or HELD_OR_UNKNOWN.
-        </p>
-        <p>
-          To avoid false positives in multi-runner situations, outcomes are attributed to the
-          specific runner on second using Unicode-normalized name matching against the description text.
-          Plays classified as HELD_OR_UNKNOWN (~2.5% of opportunities) are excluded from grading.
-        </p>
-      </Section>
-
-      <Section title="P(safe) — probability of scoring if sent">
-        <p>
-          We use an <strong>empirical bin approach</strong>: divide sent plays into 18 bins
-          (2 event types × 3 field positions × 3 out states) and compute the fraction of sent
-          runners who scored within each bin. This avoids the selection bias inherent in training
-          a predictive model on sent plays only.
-        </p>
-        <p>
-          All 18 bins had empirical P(safe) ≥ 0.947 (range: 0.947–1.000). The minimum gap
-          between empirical P(safe) and the maximum break-even probability across all bins was 0.033.
-          This means sending was the statistically correct call in every bin — no bin produced a
-          situation where holding was the right expected-value choice.
-        </p>
-        <p>
-          A logistic regression model (AUC = 0.78, features: throw distance, runner sprint speed,
-          outfielder arm strength, hit type, field position) is retained as a secondary comparison
-          column, but is <em>not</em> used as the primary grading signal due to the selection bias
-          issue described above.
-        </p>
-      </Section>
-
-      <Section title="Throw distance approximation">
-        <p>
-          We do not have raw ball-tracking data. Throw distance is approximated from Statcast hit
-          coordinates (hc_x, hc_y) using a scale factor of 2.5 feet per coordinate unit, calibrated
-          against known field geometry. Spot checks: RF single ≈ 239 ft, LF single ≈ 180 ft,
-          LF double ≈ 275 ft, RF double ≈ 268 ft — all plausible.
-        </p>
-        <p>
-          This approximation affects the logistic regression model only. The empirical bin approach
-          does not use throw distance.
-        </p>
-      </Section>
-
-      <Section title="Break-even probability (RE24)">
-        <p>
-          The break-even probability is the P(safe) at which sending and holding produce equal
-          expected run value:
+          Each graded decision carries a run value:
         </p>
         <pre className="bg-slate-100 rounded-lg p-3 text-sm font-mono overflow-x-auto">
-          P_breakeven = (RE_hold − RE_out) / (RE_safe − RE_out)
+          run_value = P(success) × RE_success + (1 − P(success)) × RE_failure − RE_hold
         </pre>
         <p>
-          RE values come from a 24-state run expectancy table (all base-out states) computed
-          from 2020–2024 Statcast data. State transitions account for other runners on base:
-          the runner on 2B is assumed to score (RE_safe) or be retired (RE_out); the runner
-          on 1B (if any) advances by one base on a single, two on a double.
-        </p>
-        <p>
-          The runner on 3B (if any) is assumed to score on all outfield hits — this holds
-          approximately 95% of the time and is a minor source of error.
+          Positive run value = decision added expected runs relative to the alternative.
+          Negative = runs left on the table (or needlessly risked). Leaderboards normalize
+          this to <strong>run value per 100 decisions</strong> to account for differing
+          opportunity counts.
         </p>
       </Section>
 
-      <Section title="Grading logic">
-        <p>
-          Each play is graded as follows, using empirical P(safe) as the primary signal:
+      {/* Per-module cards */}
+      <section>
+        <h2 className="text-xl font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">
+          Module-specific methodology
+        </h2>
+        <p className="text-slate-600 text-sm mb-5">
+          Each module applies the shared framework to a specific decision type with its own
+          data sources, bin structure, and known limitations.
         </p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {modules.map((m) => (
+            <Link
+              key={m.slug}
+              href={`/methodology/${m.slug}`}
+              className="group bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-300 hover:shadow-sm transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-blue-600" />
+                  <span className="text-xs text-slate-500 font-medium">{m.status}</span>
+                </div>
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+              </div>
+              <h3 className="mt-3 font-semibold text-slate-900">{m.name}</h3>
+              <p className="mt-1 text-sm text-slate-600 leading-relaxed">{m.tagline}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <Section title="Common data sources">
         <ul className="list-disc pl-5 space-y-1">
-          <li><strong>GOOD_SEND:</strong> Runner was sent and empirical P(safe) ≥ P_breakeven.</li>
-          <li><strong>BAD_SEND:</strong> Runner was sent and empirical P(safe) &lt; P_breakeven. (No plays in this category under the empirical approach — see key finding.)</li>
-          <li><strong>BAD_HOLD:</strong> Runner was held and empirical P(safe) ≥ P_breakeven. These represent run value left on the table.</li>
-          <li><strong>GOOD_HOLD:</strong> Runner was held and empirical P(safe) &lt; P_breakeven.</li>
-        </ul>
-        <p>
-          Run value = (P(safe) − P_breakeven) × (RE_safe − RE_out). Positive = correct decision.
-          For BAD_HOLD plays this is the expected runs left on the table by the hold.
-        </p>
-      </Section>
-
-      <Section title="Aggregation and leaderboards">
-        <p>
-          Team-year and coach-career leaderboards report <strong>bad_hold_runs_per100</strong>
-          as the primary metric: the expected run value left on the table by over-holding,
-          normalized per 100 opportunities. This accounts for variation in opportunity count
-          across teams, seasons, and parks.
-        </p>
-        <p>
-          Entries with fewer than 150 graded opportunities are flagged <strong>Low sample</strong>.
-          The 2020 season (60 games) is separately flagged.
-        </p>
-      </Section>
-
-      <Section title="External validation">
-        <p>
-          Send rate rankings were correlated against Baseball Reference&apos;s Extra Bases Taken %
-          (XBT%) — the fraction of opportunities where a team took an extra base — as an independent
-          external check. Spearman ρ = <strong>+0.780</strong> (p &lt; 0.0001, n = 120 team-years
-          with ≥ 100 opportunities). Year-over-year stability of send_rate within our dataset:
-          mean ρ = +0.340 (2022–23 pair: ρ = +0.436, p = 0.016).
-        </p>
-      </Section>
-
-      <Section title="Data sources">
-        <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Play-by-play:</strong> MLB Statcast via pybaseball (statcast function, 2020–2024).</li>
-          <li><strong>Sprint speed:</strong> Baseball Savant sprint speed leaderboard via pybaseball.</li>
-          <li><strong>Arm strength:</strong> Baseball Savant arm strength leaderboard CSV (position-specific: LF/CF/RF). Available 2020+ only — this is why v1 is bounded to 2020–2024.</li>
-          <li><strong>Run expectancy:</strong> Computed from 2020–2024 Statcast data.</li>
-          <li><strong>XBT%:</strong> Baseball Reference team baserunning pages.</li>
-          <li><strong>Coach attribution:</strong> Baseball Reference team pages, manually compiled.</li>
+          <li><strong>Play-by-play (batting events):</strong> MLB Statcast via pybaseball (2020–2024).</li>
+          <li><strong>Play-by-play (steal events):</strong> MLBAM Stats API (<code>/api/v1/game/&#123;game_pk&#125;/playByPlay</code>) — Statcast does not surface between-pitch steal events.</li>
+          <li><strong>Runner sprint speed:</strong> Baseball Savant sprint speed leaderboard via pybaseball.</li>
+          <li><strong>Catcher pop time:</strong> Baseball Savant pop time leaderboard CSV (2020+ only).</li>
+          <li><strong>Outfielder arm strength:</strong> Baseball Savant arm strength leaderboard CSV (2020+ only — reason v1 is bounded to 2020–2024).</li>
+          <li><strong>Run expectancy:</strong> 24-state RE24 table computed from 2020–2024 Statcast data.</li>
         </ul>
       </Section>
 
-      <Section title="Known limitations">
-        <ul className="space-y-2">
-          <Limitation>
-            <strong>Throw distance is approximated</strong> from hit coordinates, not measured from
-            tracking data. Scale factor 2.5 ft/unit is calibrated but not exact.
-          </Limitation>
-          <Limitation>
-            <strong>Arm strength is season-average</strong> by position for each outfielder. Play-level
-            arm strength data is not publicly available. This affects only the secondary logistic model.
-          </Limitation>
-          <Limitation>
-            <strong>No relay-throw modeling.</strong> The quality of the cutoff and relay affects actual
-            throw time to home, but this data is not in the public Statcast feed.
-          </Limitation>
-          <Limitation>
-            <strong>Runner from 3B assumed to always score</strong> on outfield hits. True ~95% of the time.
-          </Limitation>
-          <Limitation>
-            <strong>Runner from 1B advancement simplified:</strong> +1 base on a single, +2 bases on a double.
-            Actual advancement varies.
-          </Limitation>
-          <Limitation>
-            <strong>HELD_OR_UNKNOWN plays (~2.5%) excluded.</strong> The play description text did not
-            unambiguously indicate the runner&apos;s outcome.
-          </Limitation>
-          <Limitation>
-            <strong>2020 entries are unreliable</strong> due to the 60-game shortened season (~50–80
-            opportunities per team vs. ~150–220 in full seasons).
-          </Limitation>
-          <Limitation>
-            <strong>Empirical P(safe) uses bin averages.</strong> Within-bin variation in throw distance,
-            runner speed, and fielder arm is not captured. The empirical approach trades granularity
-            for freedom from selection bias.
-          </Limitation>
-          <Limitation>
-            <strong>Zero bad sends is a finding, not a gap.</strong> Under the empirical bin approach, no
-            situation existed where sending was the wrong call at the bin level. This is stated plainly
-            rather than forcing the model to produce bad sends to appear balanced.
-          </Limitation>
-        </ul>
-      </Section>
-
-      <div className="pt-4 pb-8">
+      <div className="pt-4 pb-8 flex gap-6">
         <Link href="/modules/send-hold" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-          ← View the Send/Hold Grader
+          ← Send/Hold Grader
+        </Link>
+        <Link href="/modules/steal-attempt" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+          ← Steal Attempt Grader
         </Link>
       </div>
     </div>

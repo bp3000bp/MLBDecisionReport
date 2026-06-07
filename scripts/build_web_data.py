@@ -1,10 +1,15 @@
 """
 Converts processed leaderboard CSVs -> JSON files consumed by the Next.js web app.
-Run after any pipeline change that affects graded_decisions.parquet.
+Run after any pipeline change.
 
-Output: web/data/leaderboard_team.json
-        web/data/leaderboard_coach.json
+Outputs:
+  web/data/leaderboard_team.json          (send/hold team-year)
+  web/data/leaderboard_coach.json         (send/hold coach career)
+  web/data/leaderboard_steal_team.json    (steal attempt team-year)
+  web/data/leaderboard_steal_runner.json  (steal attempt runner career)
+  web/data/meta.json                      (pipeline metadata: last_updated, years covered)
 """
+import datetime
 import json
 from pathlib import Path
 
@@ -26,22 +31,52 @@ def _clean(df: pd.DataFrame) -> list[dict]:
     return json.loads(df.to_json(orient="records"))
 
 
-def build() -> None:
-    # Team leaderboard
-    team = pd.read_csv(PROC / "leaderboard_team.csv")
-    team_path = OUT / "leaderboard_team.json"
-    team_path.write_text(json.dumps(_clean(team), indent=2))
-    print(f"  Wrote {len(team)} team-year rows -> {team_path}")
+def _write(src: Path, dst: Path, label: str) -> None:
+    if not src.exists():
+        print(f"  MISSING {src.name} -- skipping")
+        return
+    df = pd.read_csv(src)
+    dst.write_text(json.dumps(_clean(df), indent=2), encoding="utf-8")
+    print(f"  Wrote {len(df)} {label} rows -> {dst.name}")
 
-    # Coach leaderboard
-    coach_path_src = PROC / "leaderboard_coach.csv"
-    if coach_path_src.exists():
-        coach = pd.read_csv(coach_path_src)
-        coach_out = OUT / "leaderboard_coach.json"
-        coach_out.write_text(json.dumps(_clean(coach), indent=2))
-        print(f"  Wrote {len(coach)} coach rows -> {coach_out}")
-    else:
-        print("  leaderboard_coach.csv not found — skipping (run leaderboards.py first)")
+
+def _years_in_file(path: Path) -> list[int]:
+    """Return sorted list of game_year values in a CSV, for metadata."""
+    if not path.exists():
+        return []
+    try:
+        df = pd.read_csv(path, usecols=["game_year"])
+        return sorted(df["game_year"].dropna().astype(int).unique().tolist())
+    except Exception:
+        return []
+
+
+def build() -> None:
+    # Send/Hold module
+    _write(PROC / "leaderboard_team.csv",  OUT / "leaderboard_team.json",  "send/hold team-year")
+    _write(PROC / "leaderboard_coach.csv", OUT / "leaderboard_coach.json", "send/hold coach")
+
+    # Steal Attempt module
+    _write(PROC / "leaderboard_steal_team.csv",   OUT / "leaderboard_steal_team.json",   "steal team-year")
+    _write(PROC / "leaderboard_steal_runner.csv",  OUT / "leaderboard_steal_runner.json",  "steal runner career")
+
+    # IBB Decision module
+    _write(PROC / "leaderboard_ibb_team.csv", OUT / "leaderboard_ibb_team.json", "IBB team-year")
+
+    # Pipeline metadata
+    today = datetime.date.today()
+    send_hold_years = _years_in_file(PROC / "leaderboard_team.csv")
+    steal_years = _years_in_file(PROC / "leaderboard_steal_team.csv")
+    ibb_years = _years_in_file(PROC / "leaderboard_ibb_team.csv")
+    meta = {
+        "last_updated": today.isoformat(),
+        "current_year": today.year,
+        "send_hold_years": send_hold_years,
+        "steal_years": steal_years,
+        "ibb_years": ibb_years,
+    }
+    (OUT / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    print(f"  Wrote meta.json (last_updated={today.isoformat()})")
 
 
 if __name__ == "__main__":

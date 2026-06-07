@@ -17,9 +17,12 @@ Saves:
   data/processed/leaderboard_coach.parquet / .csv  (only if coaches_3b.csv exists)
 """
 import sys
+import datetime
 from pathlib import Path
 
 import pandas as pd
+
+CURRENT_YEAR = datetime.date.today().year
 
 ROOT = Path(__file__).resolve().parents[2]
 PROC = ROOT / "data" / "processed"
@@ -111,6 +114,7 @@ def build_leaderboards() -> pd.DataFrame:
     )
     lb_team["low_sample"] = lb_team["n_opportunities"] < LOW_SAMPLE_OPP
     lb_team["short_season"] = lb_team["game_year"] == 2020
+    lb_team["in_progress"] = lb_team["game_year"] == CURRENT_YEAR
     lb_team = lb_team.sort_values("bad_hold_runs_per100", ascending=False)
 
     out_pq  = PROC / "leaderboard_team.parquet"

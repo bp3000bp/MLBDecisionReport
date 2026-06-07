@@ -11,6 +11,8 @@ export interface DecisionModule {
   headlineFinding: string;
   dateRange: string;
   teamColumns: ColumnDef[];
+  /** Second leaderboard tab label (defaults to "Coach") */
+  secondaryLeaderboardLabel?: string;
   coachColumns: ColumnDef[];
 }
 
@@ -18,7 +20,7 @@ export interface ColumnDef {
   key: string;
   label: string;
   description: string;
-  format: "number" | "percent" | "runs" | "string" | "integer";
+  format: "number" | "percent" | "runs" | "string" | "integer" | "year";
   sortable: boolean;
   color?: "gradient-bad-hold" | "gradient-send" | "neutral";
   defaultSort?: "asc" | "desc";

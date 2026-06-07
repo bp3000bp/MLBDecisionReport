@@ -1,0 +1,83 @@
+name: Refresh current-season data
+
+# Runs daily at 9 AM UTC (4-5 AM US Eastern), after all previous day's games are final.
+# Also triggerable manually for immediate refreshes or after adding new reference CSVs.
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      rebuild_re24:
+        description: 'Recompute RE24 table from Statcast data'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Python ────────────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── 3. Restore historical raw data from cache ─────────────────────
+      # Cache key includes coaches_3b.csv hash — invalidates if coach data changes.
+      # Historical seasons (2020-2025) are stable; only CURRENT_YEAR is re-pulled.
+      - name: Restore historical raw data
+        id: raw-cache
+        uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: raw-historical-${{ hashFiles('data/reference/coaches_3b.csv', 'data/reference/re24_table.csv') }}
+          restore-keys: |
+            raw-historical-
+
+      # ── 4. Pull current-year data ─────────────────────────────────────
+      # Always re-pulls CURRENT_YEAR (statcast, sprint speed, steal events).
+      # Historical seasons skip if parquets already exist (from cache).
+      - name: Ingest current-year data
+        run: python scripts/run_pipeline.py --current-only --from ingest
+
+      # ── 5. Rebuild full pipeline downstream ───────────────────────────
+      - name: Rebuild features → model → eval
+        run: |
+          python scripts/run_pipeline.py --from features \
+            ${{ github.event.inputs.rebuild_re24 == 'true' && '--rebuild-re24' || '' }}
+
+      # ── 6. Save updated raw data to cache ────────────────────────────
+      # Only updates cache if the cache key changed (i.e., history was re-pulled).
+      # CURRENT_YEAR parquet is part of data/raw but excluded from the stable key.
+      - name: Save raw data to cache
+        if: steps.raw-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: data/raw
+          key: raw-historical-${{ hashFiles('data/reference/coaches_3b.csv', 'data/reference/re24_table.csv') }}
+
+      # ── 7. Commit updated web data ────────────────────────────────────
+      - name: Commit web data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/data/
+          if git diff --cached --quiet; then
+            echo "No web data changes — skipping commit"
+          else
+            git commit -m "chore: refresh $(date -u +%Y-%m-%d) data [skip ci]"
+            git push
+          fi

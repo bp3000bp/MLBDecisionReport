@@ -17,8 +17,9 @@ build/
 data/raw/
 data/processed/
 
-# ── Downloaded reference data (not our work product) ─────────────────────
-data/reference/arm_strength_*.csv
+# ── Downloaded reference data ─────────────────────────────────────────────
+# arm_strength and poptime CSVs are committed so CI/CD can run the pipeline.
+# Re-download from Baseball Savant when updating to a new season.
 
 # ── Internal planning docs ────────────────────────────────────────────────
 CLAUDE.md

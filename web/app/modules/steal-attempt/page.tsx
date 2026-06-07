@@ -6,35 +6,34 @@ import Link from "next/link";
 import LeaderboardTable from "@/components/LeaderboardTable";
 import StatCard from "@/components/StatCard";
 import DataFreshnessBanner from "@/components/DataFreshnessBanner";
-import { sendHoldModule } from "@/lib/modules/send-hold";
-import type { TeamRow, CoachRow } from "@/lib/modules/types";
+import { stealAttemptModule } from "@/lib/modules/steal-attempt";
 
-type View = "team" | "coach";
+type View = "team" | "runner";
 
-export default function SendHoldPage() {
+export default function StealAttemptPage() {
   const [view, setView] = useState<View>("team");
-  const [teamData, setTeamData] = useState<TeamRow[]>([]);
-  const [coachData, setCoachData] = useState<CoachRow[]>([]);
+  const [teamData, setTeamData] = useState<Record<string, unknown>[]>([]);
+  const [runnerData, setRunnerData] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchAll() {
       setLoading(true);
-      const [t, c] = await Promise.all([
-        fetch("/api/leaderboards/team").then((r) => r.json()),
-        fetch("/api/leaderboards/coach").then((r) => r.json()),
+      const [t, r] = await Promise.all([
+        fetch("/api/leaderboards/steal-team").then((res) => res.json()),
+        fetch("/api/leaderboards/steal-runner").then((res) => res.json()),
       ]);
       setTeamData(t);
-      setCoachData(c);
+      setRunnerData(r);
       setLoading(false);
     }
     fetchAll();
   }, []);
 
-  const rows = view === "team"
-    ? (teamData as unknown as Record<string, unknown>[])
-    : (coachData as unknown as Record<string, unknown>[]);
-  const columns = view === "team" ? sendHoldModule.teamColumns : sendHoldModule.coachColumns;
+  const rows = view === "team" ? teamData : runnerData;
+  const columns = view === "team"
+    ? stealAttemptModule.teamColumns
+    : stealAttemptModule.coachColumns;
 
   return (
     <div className="space-y-8">
@@ -44,66 +43,66 @@ export default function SendHoldPage() {
           <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Live · 2020–2026</span>
           <DataFreshnessBanner />
         </div>
-        <h1 className="text-3xl font-bold text-slate-900">{sendHoldModule.name}</h1>
-        <p className="text-slate-600 max-w-2xl leading-relaxed">{sendHoldModule.description}</p>
+        <h1 className="text-3xl font-bold text-slate-900">{stealAttemptModule.name}</h1>
+        <p className="text-slate-600 max-w-2xl leading-relaxed">{stealAttemptModule.description}</p>
       </div>
 
       {/* Key finding */}
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-3">
         <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
         <p className="text-sm text-slate-700 leading-relaxed">
-          <span className="font-semibold">Key finding:</span> {sendHoldModule.headlineFinding}
+          <span className="font-semibold">Key finding:</span> {stealAttemptModule.headlineFinding}
         </p>
       </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard
-          label="Worst season (per 100)"
-          value="11.97"
-          sub="MIL 2020 — Ed Sedar (low sample)"
-          accent="red"
-        />
-        <StatCard
-          label="Worst full-sample season"
-          value="9.42"
-          sub="MIA 2023 — Griffin Benedict"
-          accent="red"
-        />
-        <StatCard
-          label="Best full-sample season"
-          value="2.70"
-          sub="ATL 2022 — Ron Washington"
+          label="Most efficient team (full sample)"
+          value="+3.25"
+          sub="COL 2021 — 3.25 runs / 100 attempts"
           accent="green"
         />
         <StatCard
-          label="Typical send rate"
-          value="78–84%"
-          sub="Middle-of-pack teams, 2020–2025"
+          label="Best individual runner"
+          value="+3.74"
+          sub="Myles Straw — 93 attempts"
+          accent="green"
+        />
+        <StatCard
+          label="Worst individual runner"
+          value="-2.02"
+          sub="Willy Adames — 52 attempts"
+          accent="red"
+        />
+        <StatCard
+          label="Overall good-steal rate"
+          value="65.9%"
+          sub="Attempts above break-even, 2020–2025"
           accent="blue"
         />
       </div>
 
       {/* Color key */}
       <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
-        <span className="font-medium text-slate-700">Runs Left/100:</span>
+        <span className="font-medium text-slate-700">Good%:</span>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 inline-block" />
-          &lt; 4.5 — aggressive (good)
+          &gt; 85% — elite decision-making
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-amber-400 inline-block" />
-          4.5–7.0 — moderate
+          70–85% — average
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-red-500 inline-block" />
-          &gt; 7.0 — over-holding (costly)
+          &lt; 70% — costly
         </span>
       </div>
 
       {/* View toggle */}
       <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg w-fit">
-        {(["team", "coach"] as View[]).map((v) => (
+        {(["team", "runner"] as View[]).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
@@ -111,7 +110,7 @@ export default function SendHoldPage() {
               view === v ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            {v === "team" ? "By team-year" : "Career totals"}
+            {v === "team" ? "By team-year" : "By runner"}
           </button>
         ))}
       </div>
@@ -123,7 +122,7 @@ export default function SendHoldPage() {
         <LeaderboardTable
           rows={rows}
           columns={columns}
-          defaultSortKey="bad_hold_runs_per100"
+          defaultSortKey="run_value_per100"
           defaultSortDir="desc"
         />
       )}
@@ -134,16 +133,15 @@ export default function SendHoldPage() {
         <div className="space-y-1">
           <p className="font-medium">About these grades</p>
           <p>
-            Grades reflect expected run value at the moment of decision using empirical
-            P(safe) from 18 situational bins (hit type × field position × outs) against
-            RE24 break-even probabilities. P(safe) is estimated from season-average arm
-            strength and sprint speed — play-level tracking is not available. Entries
-            marked <strong>Low</strong> have fewer than 150 graded opportunities and carry
-            higher uncertainty. 2020 entries are flagged <strong>60g</strong> (60-game season).
-            Entries marked <strong>Live</strong> are from the current in-progress season and
-            will change as new games are graded.{" "}
-            <Link href="/methodology/send-hold" className="underline hover:text-amber-900">
-              Full methodology →
+            Each steal attempt is graded against the RE24 break-even success rate for its
+            base-out state. Empirical P(safe) comes from 27 bins (runner speed tier × catcher
+            pop time tier × outs) computed from all graded attempts in 2020–2025.
+            Pop time data is from Baseball Savant (2020+ only). Runners with fewer than 50
+            career attempts are flagged <strong>Low</strong>. Double-steal contexts use the
+            definitional pre-steal base state. 2020 entries are flagged <strong>60g</strong>.
+            Entries marked <strong>Live</strong> are from the current in-progress season.{" "}
+            <Link href="/methodology/steal-attempt" className="underline hover:text-amber-900">
+              Full methodology
             </Link>
           </p>
         </div>

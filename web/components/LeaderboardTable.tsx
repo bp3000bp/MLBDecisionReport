@@ -20,6 +20,7 @@ function formatValue(value: unknown, format: ColumnDef["format"]): string {
     case "percent":  return isNaN(n) ? String(value) : `${(n * 100).toFixed(1)}%`;
     case "runs":     return isNaN(n) ? String(value) : n.toFixed(2);
     case "integer":  return isNaN(n) ? String(value) : Math.round(n).toLocaleString();
+    case "year":     return isNaN(n) ? String(value) : Math.round(n).toString();
     case "number":   return isNaN(n) ? String(value) : n.toFixed(3);
     default:         return String(value);
   }
@@ -161,25 +162,23 @@ export default function LeaderboardTable({ rows, columns, defaultSortKey, defaul
                   const val = row[col.key];
                   const isLow = row.low_sample as boolean;
                   const isShort = row.short_season as boolean;
+                  const isInProgress = row.in_progress as boolean;
                   return (
                     <td key={col.key} className={`px-3 py-2.5 ${metricColor(col.key, col.color, val)}`}>
-                      {col.key === "batting_team" || col.key === "coach_name" ? (
+                      {["batting_team", "fielding_team", "coach_name", "runner_name"].includes(col.key) ? (
                         <div className="flex items-center gap-1.5">
                           <span>{String(val ?? "—")}</span>
-                          {isLow && col.key === "batting_team" && (
-                            <span title="Small sample (<150 opportunities)" className="inline-flex items-center gap-0.5 text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
+                          {isLow && (
+                            <span title="Small sample" className="inline-flex items-center gap-0.5 text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
                               <AlertTriangle className="h-3 w-3" />
                               <span>Low</span>
                             </span>
                           )}
-                          {isShort && col.key === "batting_team" && (
+                          {isShort && ["batting_team", "fielding_team"].includes(col.key) && (
                             <span title="2020 — 60-game season" className="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full">60g</span>
                           )}
-                          {isLow && col.key === "coach_name" && (
-                            <span title="Small sample (<150 opportunities)" className="inline-flex items-center gap-0.5 text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
-                              <AlertTriangle className="h-3 w-3" />
-                              <span>Low</span>
-                            </span>
+                          {isInProgress && ["batting_team", "fielding_team"].includes(col.key) && (
+                            <span title="In-progress season — partial data" className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">Live</span>
                           )}
                         </div>
                       ) : (

@@ -19,10 +19,10 @@ export const sendHoldModule: DecisionModule = {
     "In every situation we analyzed, the empirical probability of scoring " +
     "exceeded the break-even threshold. Every run lost came from holding too often — " +
     "not from sending at the wrong time.",
-  dateRange: "2020–2024",
+  dateRange: "2020–2026",
   teamColumns: [
     { key: "batting_team", label: "Team", description: "Team abbreviation", format: "string", sortable: true },
-    { key: "game_year", label: "Year", description: "Season", format: "integer", sortable: true },
+    { key: "game_year", label: "Year", description: "Season", format: "year", sortable: true },
     { key: "coach_name", label: "3B Coach", description: "Third-base coach", format: "string", sortable: true },
     { key: "n_opportunities", label: "Opp", description: "Graded opportunities", format: "integer", sortable: true },
     { key: "send_rate", label: "Send%", description: "Fraction of opportunities where runner was sent", format: "percent", sortable: true, color: "gradient-send" },

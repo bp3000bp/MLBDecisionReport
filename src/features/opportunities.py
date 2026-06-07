@@ -28,7 +28,7 @@ REF  = ROOT / "data" / "reference"
 PROC = ROOT / "data" / "processed"
 PROC.mkdir(parents=True, exist_ok=True)
 
-SEASONS = [2020, 2021, 2022, 2023, 2024]
+SEASONS = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
 OF_HITS = {"single", "double"}
 OF_LOCATIONS = {7, 8, 9}
 LOC_TO_FIELDER_COL = {7: "fielder_7", 8: "fielder_8", 9: "fielder_9"}

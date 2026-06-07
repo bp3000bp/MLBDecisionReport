@@ -1,28 +1,32 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, TrendingDown, AlertCircle, BookOpen } from "lucide-react";
+import { ArrowRight, BarChart3, CheckCircle2, AlertCircle, BookOpen } from "lucide-react";
 import StatCard from "@/components/StatCard";
+import DataFreshnessBanner from "@/components/DataFreshnessBanner";
 import { moduleRegistry } from "@/lib/modules/registry";
 
 export default function Home() {
   const liveModules = moduleRegistry.filter((m) => m.status === "live");
-  const comingSoon = moduleRegistry.filter((m) => m.status === "coming-soon");
 
   return (
     <div className="space-y-12">
       {/* Hero */}
       <section className="text-center pt-8 pb-4 space-y-4">
-        <div className="inline-flex items-center gap-2 text-sm text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-          <BarChart3 className="h-3.5 w-3.5" />
-          <span>MLB 2020–2024 · 23,913 opportunities graded</span>
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          <div className="inline-flex items-center gap-2 text-sm text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span>MLB 2020–2026 · {liveModules.length} decision modules live</span>
+          </div>
+          <DataFreshnessBanner />
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-slate-900 max-w-2xl mx-auto">
           Grading the decisions,<br className="hidden sm:block" /> not the players.
         </h1>
         <p className="text-lg text-slate-600 max-w-xl mx-auto">
-          Run-expectancy grading of in-game baseball decisions — starting with
-          third-base coach send/hold calls on extra-base opportunities.
+          Every in-game decision has a correct answer in expected-value terms. We find it,
+          grade the actual call, and surface who&apos;s adding or costing their team runs —
+          across every decision type we can measure.
         </p>
-        <div className="flex items-center justify-center gap-3 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           {liveModules.map((m) => (
             <Link
               key={m.slug}
@@ -43,24 +47,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Key finding banner */}
+      {/* How it works */}
       <section className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8">
-        <div className="flex items-start gap-4 max-w-3xl mx-auto">
-          <TrendingDown className="h-8 w-8 text-red-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <h2 className="text-lg font-semibold text-white">Headline finding</h2>
-            <p className="mt-1 text-slate-300 leading-relaxed">
-              In every one of the 18 situational bins we analyzed — single or double,
-              left/center/right field, 0–2 outs — the empirical probability of scoring
-              exceeded the break-even threshold required to justify sending. Every run
-              lost to baserunning decisions came from{" "}
-              <span className="text-red-400 font-semibold">holding too often</span>,
-              not from sending at the wrong time.
+        <h2 className="text-lg font-semibold text-white mb-4">How it works</h2>
+        <div className="grid sm:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <div className="text-blue-400 font-semibold text-sm uppercase tracking-wide">01 — Identify the decision</div>
+            <p className="text-slate-300 text-sm leading-relaxed">
+              Every baserunning opportunity, steal attempt, or tactical call is a discrete,
+              time-stamped decision with a clear binary or categorical outcome.
             </p>
-            <p className="mt-3 text-slate-400 text-sm">
-              The worst coaches left <span className="text-white">~9–12 runs per 100 opportunities</span> on
-              the table. Over a full season (~180 opp), that&apos;s roughly{" "}
-              <span className="text-white">16–22 runs</span> — more than 1.5 wins.
+          </div>
+          <div className="space-y-2">
+            <div className="text-blue-400 font-semibold text-sm uppercase tracking-wide">02 — Compute the break-even</div>
+            <p className="text-slate-300 text-sm leading-relaxed">
+              RE24 run-expectancy tables give us the exact success rate required to make a
+              risky call worth it in expected-runs terms — before any outcome is known.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <div className="text-blue-400 font-semibold text-sm uppercase tracking-wide">03 — Grade the call</div>
+            <p className="text-slate-300 text-sm leading-relaxed">
+              We estimate the true probability of success using empirical binning on observable
+              pre-play factors. Good decisions beat break-even; bad ones don&apos;t.
             </p>
           </div>
         </div>
@@ -68,15 +77,16 @@ export default function Home() {
 
       {/* Stats */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Opportunities graded" value="23,311" sub="2020–2024 regular season" accent="blue" />
-        <StatCard label="Seasons covered" value="5" sub="2020 · 2021 · 2022 · 2023 · 2024" accent="blue" />
-        <StatCard label="Coaches profiled" value="60" sub="≥1 season as 3B coach" accent="blue" />
-        <StatCard label="External validation" value="+0.78" sub="Spearman ρ vs. BR XBT%" accent="green" />
+        <StatCard label="Decisions graded" value="~55K" sub="Across all live modules, 2020–2026" accent="blue" />
+        <StatCard label="Seasons covered" value="7" sub="2020–2026 · 2026 in progress" accent="blue" />
+        <StatCard label="Live modules" value={String(liveModules.length)} sub="Send/Hold · Steal · IBB" accent="blue" />
+        <StatCard label="External validation" value="+0.78" sub="Send/Hold ρ vs. BR XBT%" accent="green" />
       </section>
 
       {/* Module cards */}
       <section>
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Decision modules</h2>
+        <h2 className="text-xl font-semibold text-slate-900 mb-1">Decision modules</h2>
+        <p className="text-sm text-slate-500 mb-4">Each module grades a specific category of in-game call using the same expected-value framework.</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {liveModules.map((m) => (
             <Link
@@ -85,7 +95,10 @@ export default function Home() {
               className="group bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-300 hover:shadow-sm transition-all"
             >
               <div className="flex items-start justify-between">
-                <span className="inline-flex items-center text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Live</span>
+                <span className="inline-flex items-center gap-1 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Live
+                </span>
                 <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
               </div>
               <h3 className="mt-3 font-semibold text-slate-900">{m.name}</h3>
@@ -95,7 +108,7 @@ export default function Home() {
           ))}
 
           {/* Coming soon placeholders */}
-          {["Steal Attempt Grader", "IBB Decision Grader", "Pinch Hit Grader"].map((name) => (
+          {["Pinch Hit Grader", "Bullpen Leverage Grader", "Bunt Decision Grader"].map((name) => (
             <div key={name} className="bg-white rounded-xl border border-slate-100 p-5 opacity-50">
               <span className="inline-flex items-center text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">Coming soon</span>
               <h3 className="mt-3 font-semibold text-slate-600">{name}</h3>
@@ -111,11 +124,12 @@ export default function Home() {
         <div className="space-y-1">
           <p className="font-medium">Scope and limitations</p>
           <p>
-            This tool grades the <em>decision layer</em> only — whether a coach sent or held given
-            what was knowable at the moment. It does not measure player ability, throw accuracy,
-            relay execution, or other factors outside the coach&apos;s direct control. All P(safe)
-            estimates use season-average statistics; play-level tracking data is not available.
-            2020 entries reflect a 60-game season and carry higher uncertainty.{" "}
+            This tool grades the <em>decision layer</em> only — whether a call was correct given
+            what was knowable at the moment it was made. It does not measure player ability,
+            execution quality, or factors outside the decision-maker&apos;s direct control.
+            All probability estimates use empirical binning on season-average statistics;
+            play-level tracking is not available for every input. 2020 entries reflect a
+            60-game season and carry higher uncertainty.{" "}
             <Link href="/methodology" className="underline hover:text-amber-900">Full methodology →</Link>
           </p>
         </div>
