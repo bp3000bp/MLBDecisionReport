@@ -6,6 +6,7 @@ import { moduleRegistry } from "@/lib/modules/registry";
 
 export default function Home() {
   const liveModules = moduleRegistry.filter((m) => m.status === "live");
+  const comingSoonModules = moduleRegistry.filter((m) => m.status === "coming-soon");
 
   return (
     <div className="space-y-12">
@@ -80,7 +81,7 @@ export default function Home() {
         <StatCard label="Decisions graded" value="~55K" sub="Across all live modules, 2020–2026" accent="blue" />
         <StatCard label="Seasons covered" value="7" sub="2020–2026 · 2026 in progress" accent="blue" />
         <StatCard label="Live modules" value={String(liveModules.length)} sub="Send/Hold · Steal · IBB" accent="blue" />
-        <StatCard label="External validation" value="+0.78" sub="Send/Hold ρ vs. BR XBT%" accent="green" />
+        <StatCard label="Spearman ρ" value="+0.78" sub="Send/Hold send rate vs. BR XBT%, n=120" accent="green" />
       </section>
 
       {/* Module cards */}
@@ -107,12 +108,20 @@ export default function Home() {
             </Link>
           ))}
 
-          {/* Coming soon placeholders */}
-          {["Pinch Hit Grader", "Bullpen Leverage Grader", "Bunt Decision Grader"].map((name) => (
-            <div key={name} className="bg-white rounded-xl border border-slate-100 p-5 opacity-50">
-              <span className="inline-flex items-center text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">Coming soon</span>
+          {/* Coming soon: from module registry */}
+          {comingSoonModules.map((m) => (
+            <div key={m.slug} className="bg-white rounded-xl border border-slate-100 p-5 opacity-60">
+              <span className="inline-flex items-center text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">In development</span>
+              <h3 className="mt-3 font-semibold text-slate-700">{m.name}</h3>
+              <p className="mt-1 text-sm text-slate-500 leading-relaxed">{m.tagline}</p>
+            </div>
+          ))}
+          {/* Additional planned modules not yet in registry */}
+          {["Starter Pull Timing Grader", "Bunt Decision Grader"].map((name) => (
+            <div key={name} className="bg-white rounded-xl border border-slate-100 p-5 opacity-40">
+              <span className="inline-flex items-center text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">Planned</span>
               <h3 className="mt-3 font-semibold text-slate-600">{name}</h3>
-              <p className="mt-1 text-sm text-slate-400">In development</p>
+              <p className="mt-1 text-sm text-slate-400">Scoped for a future release</p>
             </div>
           ))}
         </div>

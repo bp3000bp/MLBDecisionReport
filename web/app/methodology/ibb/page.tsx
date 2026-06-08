@@ -36,6 +36,34 @@ export default function IbbMethodologyPage() {
         </p>
       </div>
 
+      <Section title="Key findings (2020–2026)">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-slate-900">3,124</div>
+            <div className="text-xs text-slate-500 mt-0.5">IBBs graded</div>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-red-700">2.5%</div>
+            <div className="text-xs text-slate-500 mt-0.5">Good IBB rate</div>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-red-700">−0.140</div>
+            <div className="text-xs text-slate-500 mt-0.5">Mean runs / IBB</div>
+          </div>
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-slate-900">0.168</div>
+            <div className="text-xs text-slate-500 mt-0.5">Avg RE cost</div>
+          </div>
+        </div>
+        <p className="text-sm text-slate-600">
+          97.5% of intentional walks in this dataset were value-negative: the run-expectancy
+          cost of adding a runner almost always exceeded the matchup gain from bypassing the
+          walked batter. The average IBB costs the issuing team approximately 0.14 expected runs.
+          The good news: teams issued ~14.9 IBBs per season on average (down substantially from
+          pre-2017 levels), so the total annual cost is roughly 2–3 runs per team per season.
+        </p>
+      </Section>
+
       <Section title="What we are grading">
         <p>
           An intentional walk (IBB) is a deliberate, manager-called decision. The pitching
@@ -163,6 +191,66 @@ export default function IbbMethodologyPage() {
           Positive run_value_per100 means the team&apos;s IBBs added expected value on net.
           Negative means they subtracted expected value. Teams with fewer than 20 IBBs in a
           season are flagged <strong>Low</strong>.
+        </p>
+      </Section>
+
+      <Section title="Base-state and outs distribution">
+        <p>
+          The overwhelming majority of IBBs occur with 2B occupied — confirming the standard
+          baseball rationale (avoid putting the go-ahead run on base when 2B is empty, but
+          accepting the IBB risk when 2B is already occupied and a stronger matchup is available).
+        </p>
+        <div className="grid sm:grid-cols-2 gap-6">
+          <div>
+            <p className="text-sm font-medium text-slate-700 mb-2">Pre-IBB base state:</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-slate-500 text-xs">
+                    <th className="py-1.5 pr-3 font-medium">Base state</th>
+                    <th className="py-1.5 pr-3 font-medium text-right">n</th>
+                    <th className="py-1.5 font-medium text-right">%</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  <tr><td className="py-1.5 pr-3">2B only</td><td className="py-1.5 pr-3 text-right">1,459</td><td className="py-1.5 text-right">46.7%</td></tr>
+                  <tr><td className="py-1.5 pr-3">2B + 3B</td><td className="py-1.5 pr-3 text-right">919</td><td className="py-1.5 text-right">29.4%</td></tr>
+                  <tr><td className="py-1.5 pr-3">3B only</td><td className="py-1.5 pr-3 text-right">568</td><td className="py-1.5 text-right">18.2%</td></tr>
+                  <tr><td className="py-1.5 pr-3">1B + 3B</td><td className="py-1.5 pr-3 text-right">129</td><td className="py-1.5 text-right">4.1%</td></tr>
+                  <tr><td className="py-1.5 pr-3">Other</td><td className="py-1.5 pr-3 text-right">49</td><td className="py-1.5 text-right">1.6%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-700 mb-2">Outs at time of IBB:</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-slate-500 text-xs">
+                    <th className="py-1.5 pr-3 font-medium">Outs</th>
+                    <th className="py-1.5 pr-3 font-medium text-right">n</th>
+                    <th className="py-1.5 font-medium text-right">%</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  <tr><td className="py-1.5 pr-3">0 outs</td><td className="py-1.5 pr-3 text-right">278</td><td className="py-1.5 text-right">8.9%</td></tr>
+                  <tr><td className="py-1.5 pr-3">1 out</td><td className="py-1.5 pr-3 text-right">1,077</td><td className="py-1.5 text-right">34.5%</td></tr>
+                  <tr><td className="py-1.5 pr-3">2 outs</td><td className="py-1.5 pr-3 text-right">1,769</td><td className="py-1.5 text-right">56.6%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <p className="text-sm text-slate-500 mt-2">
+          56.6% of IBBs occur with 2 outs — the classic end-of-inning setup play. The 2-out IBB
+          carries the highest RE cost per event (the walked batter has the highest chance of
+          seeing further plate appearances before the inning ends), making the matchup hurdle
+          especially hard to clear. The average batter wOBA at IBB was .355; the average next
+          batter was .323 — a .032 gap, far below the ~.230 break-even gap required in most
+          situations. 74.2% of IBBs were issued against batters who were genuinely stronger than
+          the on-deck hitter; the remaining 25.8% were issued despite the on-deck hitter being
+          at least as dangerous.
         </p>
       </Section>
 

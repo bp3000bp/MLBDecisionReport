@@ -115,7 +115,7 @@ export default function StealAttemptMethodologyPage() {
         </p>
         <ul className="list-disc pl-5 space-y-1">
           <li><strong>Runner speed tier:</strong> Tertile split of Baseball Savant sprint speed (ft/s) by season. Fast = top third, slow = bottom third.</li>
-          <li><strong>Catcher pop time tier:</strong> Tertile split of Baseball Savant pop time (2B SBA time for steal-of-2B; 3B SBA time for steal-of-3B). Fast = lowest pop time (best catcher), slow = highest.</li>
+          <li><strong>Catcher pop time tier:</strong> Tertile split of Baseball Savant pop time (2B SBA time for steal-of-2B; 3B SBA time for steal-of-3B). Fast = lowest pop time (best catcher, hardest to steal on), slow = highest.</li>
           <li><strong>Outs:</strong> 0, 1, or 2.</li>
         </ul>
         <p>
@@ -123,9 +123,59 @@ export default function StealAttemptMethodologyPage() {
           across all speed/pop tiers. No bin is dropped entirely.
         </p>
         <p>
-          Observed P(safe) ranges from <strong>0.694</strong> (slow runner vs. fast catcher) to
-          <strong>0.860</strong> (fast runner vs. slow catcher). Overall success rate: 78.8%, consistent
-          with the MLB new-rule era (2023+ runner placement rule inflates totals slightly).
+          Overall success rate across all 22,735 graded attempts: <strong>78.7%</strong>,
+          consistent with the MLB new-rule era. <strong>67.3%</strong> of attempts were GOOD_STEAL
+          (P(safe) &gt; P_be). Mean run value per attempt: <strong>+0.014</strong>.
+        </p>
+        <p className="font-medium text-slate-700">Full 27-bin empirical P(safe) table:</p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b-2 border-slate-300 text-left text-slate-500 text-xs">
+                <th className="py-2 pr-3 font-medium">Runner speed</th>
+                <th className="py-2 pr-3 font-medium">Catcher pop</th>
+                <th className="py-2 pr-3 font-medium">Outs</th>
+                <th className="py-2 pr-3 font-medium text-right">n</th>
+                <th className="py-2 font-medium text-right">P(safe)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-xs font-mono">
+              <tr className="bg-emerald-50"><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">878</td><td className="py-1.5 text-right font-semibold">0.858</td></tr>
+              <tr className="bg-emerald-50"><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">548</td><td className="py-1.5 text-right font-semibold">0.839</td></tr>
+              <tr className="bg-emerald-50"><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">801</td><td className="py-1.5 text-right font-semibold">0.838</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">1,068</td><td className="py-1.5 text-right">0.834</td></tr>
+              <tr><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">973</td><td className="py-1.5 text-right">0.825</td></tr>
+              <tr><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">568</td><td className="py-1.5 text-right">0.822</td></tr>
+              <tr><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">1,120</td><td className="py-1.5 text-right">0.801</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">1,058</td><td className="py-1.5 text-right">0.800</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">588</td><td className="py-1.5 text-right">0.803</td></tr>
+              <tr><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">1,169</td><td className="py-1.5 text-right">0.800</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">1,132</td><td className="py-1.5 text-right">0.807</td></tr>
+              <tr><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">954</td><td className="py-1.5 text-right">0.814</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">933</td><td className="py-1.5 text-right">0.774</td></tr>
+              <tr><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">483</td><td className="py-1.5 text-right">0.774</td></tr>
+              <tr><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">1,109</td><td className="py-1.5 text-right">0.773</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">599</td><td className="py-1.5 text-right">0.758</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">1,132</td><td className="py-1.5 text-right">0.767</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">925</td><td className="py-1.5 text-right">0.781</td></tr>
+              <tr><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">954</td><td className="py-1.5 text-right">0.740</td></tr>
+              <tr><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">497</td><td className="py-1.5 text-right">0.740</td></tr>
+              <tr><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">957</td><td className="py-1.5 text-right">0.721</td></tr>
+              <tr><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">521</td><td className="py-1.5 text-right">0.760</td></tr>
+              <tr><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">492</td><td className="py-1.5 text-right">0.732</td></tr>
+              <tr><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">Medium</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">911</td><td className="py-1.5 text-right">0.786</td></tr>
+              <tr><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">2</td><td className="py-1.5 pr-3 text-right">994</td><td className="py-1.5 text-right">0.786</td></tr>
+              <tr><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">1</td><td className="py-1.5 pr-3 text-right">981</td><td className="py-1.5 text-right">0.730</td></tr>
+              <tr className="bg-red-50"><td className="py-1.5 pr-3">Slow</td><td className="py-1.5 pr-3">Fast</td><td className="py-1.5 pr-3">0</td><td className="py-1.5 pr-3 text-right">390</td><td className="py-1.5 text-right font-semibold">0.685</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="text-sm text-slate-500 mt-2">
+          P(safe) range: 0.685 (slow runner vs. fast catcher, 0 outs) to 0.858 (fast runner
+          vs. slow catcher, 2 outs). The 2-out elevation is consistent across all speed/pop
+          tiers — runners and managers take more risks with 2 outs, and the actual success rate
+          is also higher (catcher throw accuracy may decline when the out is harder to record).
+          No bin had fewer than 30 observations; no fallback to marginal rate was triggered.
         </p>
       </Section>
 
