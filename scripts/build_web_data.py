@@ -63,6 +63,9 @@ def build() -> None:
     # IBB Decision module
     _write(PROC / "leaderboard_ibb_team.csv", OUT / "leaderboard_ibb_team.json", "IBB team-year")
 
+    # Pinch Hit module
+    _write(PROC / "leaderboard_pinch_hit_team.csv", OUT / "leaderboard_pinch_hit_team.json", "pinch hit team-year")
+
     # Pipeline metadata
     today = datetime.date.today()
     send_hold_years = _years_in_file(PROC / "leaderboard_team.csv")

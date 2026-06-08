@@ -78,9 +78,9 @@ export default function Home() {
 
       {/* Stats */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Decisions graded" value="~55K" sub="Across all live modules, 2020–2026" accent="blue" />
+        <StatCard label="Decisions graded" value="~73K" sub="Across all live modules, 2020–2026" accent="blue" />
         <StatCard label="Seasons covered" value="7" sub="2020–2026 · 2026 in progress" accent="blue" />
-        <StatCard label="Live modules" value={String(liveModules.length)} sub="Send/Hold · Steal · IBB" accent="blue" />
+        <StatCard label="Live modules" value={String(liveModules.length)} sub="Send/Hold · Steal · IBB · PH" accent="blue" />
         <StatCard label="Spearman ρ" value="+0.78" sub="Send/Hold send rate vs. BR XBT%, n=120" accent="green" />
       </section>
 

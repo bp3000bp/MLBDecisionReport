@@ -49,3 +49,8 @@ export function getStealRunnerLeaderboard(): Record<string, unknown>[] {
 export function getIbbTeamLeaderboard(): Record<string, unknown>[] {
   return readJson<Record<string, unknown>>("leaderboard_ibb_team.json");
 }
+
+// Pinch Hit module
+export function getPinchHitTeamLeaderboard(): Record<string, unknown>[] {
+  return readJson<Record<string, unknown>>("leaderboard_pinch_hit_team.json");
+}

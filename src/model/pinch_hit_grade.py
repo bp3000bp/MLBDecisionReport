@@ -114,10 +114,9 @@ def build_pinch_hit_decisions() -> pd.DataFrame:
         )
     df = pd.read_parquet(opp_path)
     n_raw = len(df)
+    df = grade(df)
     df = df.dropna(subset=["ph_woba", "rep_woba"])
     print(f"Loaded {n_raw:,} opportunities; {len(df):,} gradeable")
-
-    df = grade(df)
 
     print(f"\nDecision breakdown:")
     print(df["decision"].value_counts().to_string())
